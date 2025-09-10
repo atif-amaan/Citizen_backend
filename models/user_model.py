@@ -1,5 +1,6 @@
 from config import get_db_connection
 import psycopg2
+import psycopg2.extras
 
 def create_user(name, email, password, role="citizen"):
     conn = get_db_connection()

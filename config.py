@@ -6,6 +6,6 @@ def get_db_connection():
         host="localhost",
         database="citizen_app",
         user="my_app_user",
-        password="11223344",
+        password="password",
         port="5432"
     )
