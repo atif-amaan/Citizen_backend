@@ -1,32 +1,20 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask import Flask, send_from_directory
 from controllers.user_controller import user_bp
 from controllers.report_controller import report_bp
+import os
 
 app = Flask(__name__)
-CORS(app)
 
-# 🔑 JWT Configuration
-app.config["JWT_SECRET_KEY"] = "supersecretkey123"  # change to env var in production
-jwt = JWTManager(app)
-
-# Register Blueprints
+# Blueprints
 app.register_blueprint(user_bp)
 app.register_blueprint(report_bp)
 
-@app.route('/')
-def home():
-    return {"message": "Backend is running"}
+# Serve uploaded images
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory("uploads", filename)
 
-# Custom error for missing/invalid JWT
-@jwt.unauthorized_loader
-def missing_token_callback(err):
-    return jsonify({"msg": "Missing Authorization Header"}), 401
+if __name__ == "__main__":
+    os.makedirs("uploads", exist_ok=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
 
-@jwt.invalid_token_loader
-def invalid_token_callback(err):
-    return jsonify({"msg": "Invalid token"}), 422
-
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)

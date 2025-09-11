@@ -34,3 +34,10 @@ def update_report_status(report_id, status):
     cur.close()
     conn.close()
     return True
+
+def get_reports_by_user(user_id):
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    query = "SELECT * FROM reports WHERE user_id = %s"
+    cur.execute(query, (user_id,))
+    return cur.fetchall()
