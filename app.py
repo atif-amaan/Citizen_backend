@@ -8,14 +8,13 @@ app = Flask(__name__)
 CORS(app)
 
 # 🔑 JWT Configuration
-app.config["JWT_SECRET_KEY"] = "supersecretkey123"  # Change this to a strong secret
+app.config["JWT_SECRET_KEY"] = "supersecretkey123"  # change to env var in production
 jwt = JWTManager(app)
 
 # Register Blueprints
 app.register_blueprint(user_bp)
 app.register_blueprint(report_bp)
 
-# Optional: protect all routes with JWT (demo route)
 @app.route('/')
 def home():
     return {"message": "Backend is running"}

@@ -1,5 +1,6 @@
 from config import get_db_connection
 import psycopg2
+import psycopg2.extras
 
 def create_report(user_id, issue_type, description, latitude, longitude, image_url):
     conn = get_db_connection()

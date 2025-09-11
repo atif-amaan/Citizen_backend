@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
-from models import report_model
+from models import report_model, user_model
 import os
 from werkzeug.utils import secure_filename
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import get_jwt, jwt_required, get_jwt_identity
 
 report_bp = Blueprint("report", __name__)
 UPLOAD_FOLDER = "uploads"
@@ -11,11 +11,18 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 @report_bp.route('/report', methods=['POST'])
 @jwt_required()
 def add_report():
-    current_user = get_jwt_identity()
-    if current_user["role"] != "citizen":
+    # claims = get_jwt()
+    # if claims["role"] != "citizen":
+    #     return jsonify({"message": "Only citizens can submit reports"}), 403
+    current_user_id = get_jwt_identity()
+    user = user_model.get_user_by_id(current_user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    if user["role"] != "citizen":
         return jsonify({"message": "Only citizens can submit reports"}), 403
 
-    user_id = current_user["id"]
+    user_id = current_user_id
     issue_type = request.form.get('issue_type')
     description = request.form.get('description')
     latitude = request.form.get('latitude')
@@ -32,21 +39,31 @@ def add_report():
     report_id = report_model.create_report(user_id, issue_type, description, latitude, longitude, image_url)
     return jsonify({"message": "Report submitted ✅", "report_id": report_id})
 
+
 @report_bp.route('/reports', methods=['GET'])
 @jwt_required()
 def get_reports():
-    current_user = get_jwt_identity()
-    if current_user["role"] not in ["admin", "department"]:
+    current_user_id = get_jwt_identity()
+    user = user_model.get_user_by_id(current_user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    if user["role"] not in ["admin", "department"]:
         return jsonify({"message": "Unauthorized"}), 403
 
     reports = report_model.get_all_reports()
     return jsonify(reports)
 
+
 @report_bp.route('/report/<int:report_id>', methods=['PUT'])
 @jwt_required()
 def update_status(report_id):
-    current_user = get_jwt_identity()
-    if current_user["role"] not in ["admin", "department"]:
+    current_user_id = get_jwt_identity()
+    user = user_model.get_user_by_id(current_user_id)
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    if user["role"] not in ["admin", "department"]:
         return jsonify({"message": "Only admins or departments can update status"}), 403
 
     status = request.json.get('status')

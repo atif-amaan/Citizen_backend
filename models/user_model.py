@@ -21,3 +21,12 @@ def get_user_by_email(email):
     cur.close()
     conn.close()
     return dict(user) if user else None
+
+def get_user_by_id(user_id):
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    return dict(user) if user else None
