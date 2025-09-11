@@ -27,7 +27,9 @@ def add_report():
         filename = secure_filename(file.filename)
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
-        image_url = f"/uploads/{filename}"
+
+        # Get full URL instead of relative path
+        image_url = request.host_url.rstrip("/") + "/uploads/" + filename
 
     report_id = report_model.create_report(user_id, issue_type, description, latitude, longitude, image_url)
     return jsonify({"message": "Report submitted ✅", "report_id": report_id})

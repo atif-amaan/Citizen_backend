@@ -35,9 +35,13 @@ def update_report_status(report_id, status):
     conn.close()
     return True
 
+# models/report_model.py
 def get_reports_by_user(user_id):
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    query = "SELECT * FROM reports WHERE user_id = %s"
+    query = "SELECT * FROM reports WHERE user_id = %s ORDER BY created_at DESC"
     cur.execute(query, (user_id,))
-    return cur.fetchall()
+    reports = cur.fetchall()
+    cur.close()
+    conn.close()
+    return [dict(r) for r in reports]   # 👈 convert to list of dicts
